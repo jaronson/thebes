@@ -34,9 +34,7 @@ describe Thebes::Query, "after configuration" do
       Thebes::Query.before_running = Proc.new {|q| }
       Thebes::Query.before_running.expects(:call)
     end
-
   end
-
 end
 
 describe Thebes::Query, "against live data" do
