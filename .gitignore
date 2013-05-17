@@ -4,3 +4,4 @@ pkg/*
 spec/support/database.yml
 spec/support/test.sphinx.conf
 tmp
+.rvmrc
