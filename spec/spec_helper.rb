@@ -1,5 +1,7 @@
 require 'rubygems'
 require 'bundler/setup'
+require 'rails/all'
+require 'rspec/rails'
 
 require 'thebes' # and any other gems you need
 
@@ -57,10 +59,11 @@ RSpec.configure do |config|
     end
 
   end
+
   config.after :each do
-    ActiveRecord::Base.connection.execute('SHOW TABLES;').each do |table|
+    ActiveRecord::Base.connection.execute('SHOW TABLES').each do |table|
       # Or whatever you think is appropriate.
-      next if table.index('schema_migrations') or table.index('roles')
+      next if table.index('schema_migrations') || table.index('roles')
       ActiveRecord::Base.connection.execute("TRUNCATE #{table}")
     end
   end
