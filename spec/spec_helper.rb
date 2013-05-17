@@ -64,9 +64,10 @@ RSpec.configure do |config|
     ActiveRecord::Base.connection.execute('SHOW TABLES').each do |table|
       # Or whatever you think is appropriate.
       next if table.index('schema_migrations') || table.index('roles')
-      ActiveRecord::Base.connection.execute("TRUNCATE #{table}")
+      ActiveRecord::Base.connection.execute("TRUNCATE #{table.first}")
     end
   end
+
   config.after :suite do
 
     # Stop searchd after specs run.

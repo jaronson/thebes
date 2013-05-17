@@ -1,5 +1,5 @@
 require 'riddle'
-require 'riddle/1.10'
+require 'riddle/2.0.1'
 
 module Thebes
 
@@ -8,26 +8,27 @@ module Thebes
                    :before_running,
                    :servers
 
-    def initialize *args
+    def initialize(*args)
       if !args.empty? || self.class.servers.empty?
-        super *args
+        super(*args)
       else
-        super *self.class.servers[rand(self.class.servers.size)]
+        host, port = self.class.servers.sample
+        super(host, port)
       end
+    end
+
+    def servers
+      @servers
     end
 
     class << self
-
-      def run &block
+      def run(&block)
         client = new # would take server and port
         before_query.call(client) if before_query
-        block.call client
+        yield client if block_given?
         before_running.call(client) if before_running
         client.run
       end
-
     end
-
   end
-
 end

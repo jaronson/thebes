@@ -8,7 +8,8 @@ describe Thebes::Query, "after configuration" do
 
   subject { Thebes::Query.new }
 
-  its(:servers) { should == [['127.0.0.2', 111]] }
+  its(:servers) { should == ['127.0.0.2'] }
+  its(:port)    { should == 111 }
 
   context "running query" do
     
@@ -40,7 +41,7 @@ end
 
 describe Thebes::Query, "against live data" do
 
-  before {
+  let(:create_items!) do
     Thebes::Query.servers = [['127.0.0.1', 9333]]
     Item.create \
       :name => "Larry",
@@ -58,41 +59,57 @@ describe Thebes::Query, "against live data" do
       :name => "Shemp",
       :active => true,
       :body => "Shemp, like his brothers Moe and Curly, was born in Brownsville, Brooklyn. He was the third of the five Horwitz brothers and of Levite[citation needed] and Lithuanian Jewish ancestry."
-    SPHINX.index # :verbose => true
-  }
+    SPHINX.index
+  end
 
   context "searching for 'Horwitz'" do
+    before(:each) do
+      create_items!
+      SPHINX.index
 
-    before {
       @result = Thebes::Query.run do |q|
-        q.append_query 'Horwitz', 'items'
+        q.append_query('Horwitz', 'items')
       end
-    }
+    end
 
-    subject { @result.first[:matches] }
+    let(:matches){ @result.first[:matches] }
 
-    its(:length) { should == 3 }
-    its(:first) { subject[:attributes]['_id'] == 2 }
-    its(:last) { subject[:attributes]['_id'] == 4 }
+    it 'should return 3 matches' do
+      matches.size.should eql 3
+    end
 
+    it 'should return id #2' do
+      matches.first[:attributes]['_id'].should eql 2
+    end
+
+    it 'should return id #4' do
+      matches.last[:attributes]['_id'].should eql 4
+    end
   end
 
   context "searching for 'Horwitz' with filter" do
+    before(:each) do
+      create_items!
+      SPHINX.index
 
-    before {
       @result = Thebes::Query.run do |q|
         q.filters << Riddle::Client::Filter.new('active', [1])
         q.append_query 'Horwitz', 'items'
       end
-    }
+    end
 
-    subject { @result.first[:matches] }
+    let(:matches){ @result.first[:matches] }
 
-    its(:length) { should == 2 }
-    its(:first) { subject[:attributes]['_id'] == 2 }
-    its(:last) { subject[:attributes]['_id'] == 4 }
+    it 'should return 2 matches' do
+      matches.size.should eql 2
+    end
 
+    it 'should return id #2' do
+      matches.first[:attributes]['_id'].should eql 2
+    end
+
+    it 'should return id #4' do
+      matches.last[:attributes]['_id'].should eql 4
+    end
   end
-
-
 end
